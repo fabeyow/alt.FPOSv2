@@ -7,6 +7,23 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## alt.FPOS database setup
+
+Configure your database in `.env`, then run:
+
+```sh
+php artisan migrate --seed
+php artisan serve
+```
+
+The default connection is SQLite (`database/database.sqlite`). Create that file if it does not exist. Open `/customers` and `/users` to see five sample accounts in each table. Repeating the seeder does not duplicate sample records or overwrite edited accounts.
+
+The schema follows [TFA2](https://github.com/fabeyow/alt.FPOS/commit/61c80d0f5ddec766db20c191dec303b3f93824fc): customers have `full_name`, `email`, nullable `phone`, and `created_at`; users have unique `username`, `full_name`, `role` (default `Staff`), and `created_at`. Neither model writes `updated_at`. The existing table layout and styling are retained; the users table displays username instead of email to match TFA2.
+
+The users migration upgrades Laravel's starter table, preserving IDs and names and assigning existing rows a `user_{id}` username. It removes the starter authentication fields, including email and password. Back up any populated database before upgrading; rollback restores the starter schema, but cannot recover removed authentication data.
+
+Run `php artisan test` to verify database-backed pages, seeding, constraints, and migration upgrade/rollback behavior using an isolated in-memory SQLite database.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
