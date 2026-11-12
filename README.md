@@ -24,6 +24,23 @@ The users migration upgrades Laravel's starter table, preserving IDs and names a
 
 Run `php artisan test` to verify database-backed pages, seeding, constraints, and migration upgrade/rollback behavior using an isolated in-memory SQLite database.
 
+## Account forms and avatars
+
+Run `composer install`, enable PHP's GD extension (`extension=gd` in the loaded `php.ini`), then run:
+
+```sh
+php artisan migrate
+php artisan storage:link
+```
+
+Set `APP_URL` in `.env` to the application's public URL so avatar links resolve correctly. PHP's `upload_max_filesize` must allow at least 2MB, and `post_max_size` must be larger to allow multipart form overhead.
+
+Use `/customers/create` and `/users/create`, or the Create buttons on the listing pages. Each row has an Edit link. Forms retain submitted values and show validation errors. Customer names and valid emails are required; usernames must be unique and user names are required. Editing a user allows their existing username.
+
+User edit pages accept image uploads up to 2MB. [Intervention Image v3](https://image.intervention.io/v3) with GD crops and re-encodes uploads into 256 × 256 JPEG thumbnails. Confirm this package meets your instructor's approved package list. Only the generated `avatars/*.jpg` path is stored in `users.avatar`; files use Laravel's public storage disk. A successful replacement removes the previous avatar, and submitting without a new image preserves it. Users without an avatar display a bundled placeholder.
+
+Run `php artisan test` with GD enabled to verify the forms, validation, thumbnail dimensions, replacement, and listing display. These account records follow the existing teaching schema; they do not provide password authentication or access control.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

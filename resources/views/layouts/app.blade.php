@@ -19,6 +19,12 @@
         th, td { padding: .8rem 1rem; text-align: left; border-bottom: 1px solid #334155; }
         th { background: #334155; }
         footer { text-align: center; padding: 2rem; color: #94a3b8; }
+        .account-form { display: grid; gap: .75rem; max-width: 560px; }
+        input { padding: .7rem; border: 1px solid #94a3b8; border-radius: 6px; font: inherit; }
+        button.btn { border: 0; cursor: pointer; font: inherit; }
+        .avatar { border-radius: 50%; object-fit: cover; }
+        .errors { color: #fecaca; }
+        a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid #38bdf8; outline-offset: 3px; }
     </style>
 </head>
 <body>
@@ -27,11 +33,22 @@
         <div>
             <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a>
             <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">About</a>
-            <a href="{{ route('customers') }}" class="{{ request()->routeIs('customers') ? 'active' : '' }}">Customers</a>
-            <a href="{{ route('users') }}" class="{{ request()->routeIs('users') ? 'active' : '' }}">Users</a>
+            <a href="{{ route('customers') }}" class="{{ request()->routeIs('customers', 'customers.*') ? 'active' : '' }}">Customers</a>
+            <a href="{{ route('users') }}" class="{{ request()->routeIs('users', 'users.*') ? 'active' : '' }}">Users</a>
         </div>
     </nav>
-    <main>@yield('content')</main>
+    <main>
+        @if (session('status'))
+            <p role="status">{{ session('status') }}</p>
+        @endif
+        @if ($errors->any())
+            <div class="errors" role="alert">
+                <p>Please correct the following:</p>
+                <ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+            </div>
+        @endif
+        @yield('content')
+    </main>
     <footer>© {{ date('Y') }} alt.FPOS — Built with Laravel {{ app()->version() }}</footer>
 </body>
 </html>

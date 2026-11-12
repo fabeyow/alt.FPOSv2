@@ -18,5 +18,5 @@ class User extends Model
      *
      * @var list<string>
      */
-    protected $fillable = ['username', 'full_name', 'role'];
+    protected $fillable = ['username', 'full_name', 'role', 'avatar'];
 }
