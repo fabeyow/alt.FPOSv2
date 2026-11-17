@@ -15,11 +15,18 @@ class AccountFormsTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(User::factory()->make(['id' => 1000]));
+    }
+
     public function test_customer_can_be_created_and_edited_with_prefilled_values(): void
     {
         $this->get('/customers/create')->assertOk()->assertSee('Create Customer');
         $data = ['full_name' => 'Customer One', 'email' => 'one@example.com', 'phone' => '123'];
-        $this->post('/customers', $data)->assertRedirect(route('customers'));
+        $this->post('/customers', $data)->assertRedirect(route('customers.index'));
         $customer = Customer::sole();
         $this->assertDatabaseHas('customers', $data);
         $this->get(route('customers.edit', $customer))->assertOk()
@@ -28,7 +35,7 @@ class AccountFormsTest extends TestCase
 
         $this->put(route('customers.update', $customer), [
             'full_name' => 'Changed Customer', 'email' => 'changed@example.com', 'phone' => '',
-        ])->assertRedirect(route('customers'));
+        ])->assertRedirect(route('customers.index'));
         $this->assertDatabaseHas('customers', [
             'id' => $customer->id, 'full_name' => 'Changed Customer', 'email' => 'changed@example.com', 'phone' => null,
         ]);
@@ -53,7 +60,7 @@ class AccountFormsTest extends TestCase
         $this->get('/users/create')->assertOk()->assertSee('Create User');
         $this->post('/users', [])->assertSessionHasErrors(['username', 'full_name']);
         $this->post('/users', ['username' => 'first', 'full_name' => 'First User', 'avatar' => 'untrusted.jpg'])
-            ->assertRedirect(route('users'));
+            ->assertRedirect(route('users.index'));
         $user = User::sole();
         $this->assertSame('Staff', $user->role);
         $this->assertNull($user->avatar);
@@ -66,7 +73,7 @@ class AccountFormsTest extends TestCase
             ->assertSee('enctype="multipart/form-data"', false);
         $this->put(route('users.update', $user), [
             'username' => 'first', 'full_name' => 'Changed User', 'role' => 'Manager',
-        ])->assertRedirect(route('users'));
+        ])->assertRedirect(route('users.index'));
         $this->assertSame('Changed User', $user->fresh()->full_name);
         $other = User::factory()->create();
         $this->put(route('users.update', $user), ['username' => $other->username, 'full_name' => 'Bad'])
@@ -84,7 +91,7 @@ class AccountFormsTest extends TestCase
         $this->get('/users')->assertSee(asset('images/avatar-placeholder.svg'));
         $this->put(route('users.update', $user), $data + [
             'avatar' => UploadedFile::fake()->image('portrait.png', 800, 400),
-        ])->assertRedirect(route('users'));
+        ])->assertRedirect(route('users.index'));
 
         $path = $user->fresh()->avatar;
         $this->assertStringStartsWith('avatars/', $path);
@@ -93,13 +100,13 @@ class AccountFormsTest extends TestCase
         $image = getimagesizefromstring(Storage::disk('public')->get($path));
         $this->assertSame([256, 256, 'image/jpeg'], [$image[0], $image[1], $image['mime']]);
         $this->get('/users')->assertSee(Storage::disk('public')->url($path));
-        $this->put(route('users.update', $user), $data)->assertRedirect(route('users'));
+        $this->put(route('users.update', $user), $data)->assertRedirect(route('users.index'));
         $this->assertSame($path, $user->fresh()->avatar);
         Storage::disk('public')->assertExists($path);
 
         $this->put(route('users.update', $user), $data + [
             'avatar' => UploadedFile::fake()->image('replacement.jpg', 100, 200),
-        ])->assertRedirect(route('users'));
+        ])->assertRedirect(route('users.index'));
         $newPath = $user->fresh()->avatar;
         $this->assertNotSame($path, $newPath);
         Storage::disk('public')->assertMissing($path);

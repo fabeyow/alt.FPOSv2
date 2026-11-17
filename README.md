@@ -16,11 +16,11 @@ php artisan migrate --seed
 php artisan serve
 ```
 
-The default connection is SQLite (`database/database.sqlite`). Create that file if it does not exist. Open `/customers` and `/users` to see five sample accounts in each table. Repeating the seeder does not duplicate sample records or overwrite edited accounts.
+The default connection is SQLite (`database/database.sqlite`). Create that file if it does not exist. After registering and logging in, open `/customers` and `/users` to see five sample accounts in each table. Repeating the seeder does not duplicate sample records or overwrite edited accounts.
 
 The schema follows [TFA2](https://github.com/fabeyow/alt.FPOS/commit/61c80d0f5ddec766db20c191dec303b3f93824fc): customers have `full_name`, `email`, nullable `phone`, and `created_at`; users have unique `username`, `full_name`, `role` (default `Staff`), and `created_at`. Neither model writes `updated_at`. The existing table layout and styling are retained; the users table displays username instead of email to match TFA2.
 
-The users migration upgrades Laravel's starter table, preserving IDs and names and assigning existing rows a `user_{id}` username. It removes the starter authentication fields, including email and password. Back up any populated database before upgrading; rollback restores the starter schema, but cannot recover removed authentication data.
+The historical users migration upgrades Laravel's starter table, preserving IDs and names and assigning existing rows a `user_{id}` username. It removes the original authentication fields. The new authentication migration adds nullable unique email, password, email verification, and remember-token fields while preserving existing POS records. Neither model writes `updated_at`. Rolling back the new migration removes those credentials; it does not delete accounts.
 
 Run `php artisan test` to verify database-backed pages, seeding, constraints, and migration upgrade/rollback behavior using an isolated in-memory SQLite database.
 
@@ -39,7 +39,34 @@ Use `/customers/create` and `/users/create`, or the Create buttons on the listin
 
 User edit pages accept image uploads up to 2MB. [Intervention Image v3](https://image.intervention.io/v3) with GD crops and re-encodes uploads into 256 × 256 JPEG thumbnails. Confirm this package meets your instructor's approved package list. Only the generated `avatars/*.jpg` path is stored in `users.avatar`; files use Laravel's public storage disk. A successful replacement removes the previous avatar, and submitting without a new image preserves it. Users without an avatar display a bundled placeholder.
 
-Run `php artisan test` with GD enabled to verify the forms, validation, thumbnail dimensions, replacement, and listing display. These account records follow the existing teaching schema; they do not provide password authentication or access control.
+Run `php artisan test` with GD enabled to verify the forms, validation, thumbnail dimensions, replacement, and listing display.
+
+## Resource routes and authentication
+
+[Laravel Breeze](https://github.com/laravel/breeze) provides the Blade login, registration, logout, password reset, and profile screens. Install dependencies and prepare the application:
+
+```sh
+composer install
+npm install
+npm run build
+php artisan migrate
+php artisan serve
+```
+
+Visit `/register` and provide a unique username, full name, unique email, and confirmed password (at least eight characters). Registration signs you in with the default `Staff` role. Later, sign in at `/login` using your email and password. Use Log Out in the navigation to end the session. The dashboard links to both account lists.
+
+Existing seeded accounts and records created through the POS user form retain their original fields and have no login credentials. Register a new account with a different username to sign in; no shared password is assigned to existing records. Password reset email requires a configured mail transport in `.env`; the default log mailer writes messages locally.
+
+Each controller uses the conventional `index`, `create`, `store`, `edit`, and `update` methods. Each resource has one `Route::resource(...)->only(...)` declaration covering those existing actions. List routes are named `customers.index` and `users.index`; forms use the conventional `.create`, `.store`, `.edit`, and `.update` names. All ten resource routes use Laravel's `auth` middleware. Home and About remain public. Every registered user can manage both resources; role-based permissions are outside this activity.
+
+Verify access control manually:
+
+1. Log out, then visit `/customers` or `/users`. Each redirects to `/login`.
+2. Log in with your registered account. Laravel returns you to the requested page, which displays normally.
+3. Open the Create and Edit pages and save a record to verify authenticated form access.
+4. Log out and revisit a protected page to confirm access is blocked again.
+
+Run `php artisan test` for the automated checks. `AccountAccessTest` covers guest redirects for every resource action (including both PUT and PATCH), blocked guest writes, login return paths, authenticated listings, logout, registration validation, password hashing, and preservation of existing accounts during migration. Existing account tests now authenticate before accessing protected pages. Tests use an isolated in-memory SQLite database and do not require a running Vite server. With CLI GD disabled but installed, run `php -d extension=gd vendor/phpunit/phpunit/phpunit`.
 
 ## About Laravel
 

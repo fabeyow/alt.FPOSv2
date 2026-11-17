@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.pos')
 @section('title', $customer->exists ? 'Edit Customer' : 'Create Customer')
 @section('content')
 <h1>{{ $customer->exists ? 'Edit Customer' : 'Create Customer' }}</h1>
@@ -15,7 +15,7 @@
     <input id="phone" name="phone" type="tel" value="{{ old('phone', $customer->phone) }}" maxlength="20" autocomplete="tel">
     <div>
         <button class="btn" type="submit">Save Customer</button>
-        <a class="btn" href="{{ route('customers') }}">Cancel</a>
+        <a class="btn" href="{{ route('customers.index') }}">Cancel</a>
     </div>
 </form>
 @endsection

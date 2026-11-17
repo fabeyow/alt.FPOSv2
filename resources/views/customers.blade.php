@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.pos')
 @section('title', 'Customers')
 @section('content')
 <h1>Customer Accounts</h1>

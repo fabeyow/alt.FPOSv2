@@ -1,11 +1,11 @@
-@extends('layouts.app')
+@extends('layouts.pos')
 @section('title', 'Home')
 @section('content')
 <section class="hero">
     <h1>Smarter Sales with alt.FPOS</h1>
     <p>A modern, lightweight Point-of-Sale system built with Laravel. Manage customers, track users, and streamline your retail operations.</p>
-    <a class="btn" href="{{ route('customers') }}">👥 View Customers</a>
-    <a class="btn" href="{{ route('users') }}">🔑 Manage Users</a>
+    <a class="btn" href="{{ route('customers.index') }}">👥 View Customers</a>
+    <a class="btn" href="{{ route('users.index') }}">🔑 Manage Users</a>
 </section>
 <section class="cards">
     <div class="card"><h3>👥 Customer Management</h3><p>Organized contact records with names, emails, and phone numbers.</p></div>

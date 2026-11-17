@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.pos')
 @section('title', 'About')
 @section('content')
 <h1>About alt.FPOS</h1>

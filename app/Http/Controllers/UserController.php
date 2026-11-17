@@ -28,7 +28,7 @@ class UserController extends Controller
     {
         User::create($this->validated($request));
 
-        return redirect()->route('users')->with('status', 'User created.');
+        return redirect()->route('users.index')->with('status', 'User created.');
     }
 
     public function edit(User $user)
@@ -69,7 +69,7 @@ class UserController extends Controller
             Storage::disk('public')->delete($oldAvatar);
         }
 
-        return redirect()->route('users')->with('status', 'User updated.');
+        return redirect()->route('users.index')->with('status', 'User updated.');
     }
 
     private function validated(Request $request, ?User $user = null): array

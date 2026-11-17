@@ -13,6 +13,13 @@ class AccountPagesTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(User::factory()->make(['id' => 1000]));
+    }
+
     public function test_seeded_accounts_render_in_the_existing_tables(): void
     {
         $this->seed();
@@ -21,7 +28,7 @@ class AccountPagesTest extends TestCase
         $this->assertDatabaseCount('customers', 5);
         $this->assertDatabaseCount('users', 5);
 
-        $customers = $this->get(route('customers'))->assertOk()
+        $customers = $this->get(route('customers.index'))->assertOk()
             ->assertSee('<th>ID</th><th>Name</th><th>Email</th><th>Phone</th>', false);
 
         foreach (Customer::all() as $customer) {
@@ -33,7 +40,7 @@ class AccountPagesTest extends TestCase
             ], false);
         }
 
-        $users = $this->get(route('users'))->assertOk()
+        $users = $this->get(route('users.index'))->assertOk()
             ->assertSee('<th>ID</th><th>Username</th><th>Full Name</th><th>Role</th>', false);
 
         foreach (User::all() as $user) {
@@ -57,22 +64,22 @@ class AccountPagesTest extends TestCase
         $this->assertNotNull($customer->created_at);
         $this->assertNotNull($user->created_at);
 
-        $this->get(route('customers'))->assertOk()
+        $this->get(route('customers.index'))->assertOk()
             ->assertSee($customer->full_name)->assertDontSee($customer->full_name, false);
-        $this->get(route('users'))->assertOk()
+        $this->get(route('users.index'))->assertOk()
             ->assertSee($user->full_name)->assertDontSee($user->full_name, false);
 
         $customer->update(['full_name' => 'Changed Customer']);
         $user->update(['full_name' => 'Changed User']);
 
-        $this->get(route('customers'))->assertSee('Changed Customer');
-        $this->get(route('users'))->assertSee('Changed User');
+        $this->get(route('customers.index'))->assertSee('Changed Customer');
+        $this->get(route('users.index'))->assertSee('Changed User');
     }
 
     public function test_empty_account_tables_render_successfully(): void
     {
-        $this->get(route('customers'))->assertOk()->assertSee('Customer Accounts');
-        $this->get(route('users'))->assertOk()->assertSee('User Accounts');
+        $this->get(route('customers.index'))->assertOk()->assertSee('Customer Accounts');
+        $this->get(route('users.index'))->assertOk()->assertSee('User Accounts');
     }
 
     public function test_users_default_to_staff_and_usernames_are_unique(): void
@@ -88,6 +95,8 @@ class AccountPagesTest extends TestCase
     public function test_users_migration_can_roll_back_and_upgrade_existing_names(): void
     {
         $account = User::factory()->create();
+        $authMigration = require database_path('migrations/2026_11_17_000000_add_authentication_to_users_table.php');
+        $authMigration->down();
         $migration = require database_path('migrations/2026_10_31_000001_match_users_to_tfa2_schema.php');
         $migration->down();
 

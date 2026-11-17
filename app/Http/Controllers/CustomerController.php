@@ -21,7 +21,7 @@ class CustomerController extends Controller
     {
         Customer::create($this->validated($request));
 
-        return redirect()->route('customers')->with('status', 'Customer created.');
+        return redirect()->route('customers.index')->with('status', 'Customer created.');
     }
 
     public function edit(Customer $customer)
@@ -33,7 +33,7 @@ class CustomerController extends Controller
     {
         $customer->update($this->validated($request));
 
-        return redirect()->route('customers')->with('status', 'Customer updated.');
+        return redirect()->route('customers.index')->with('status', 'Customer updated.');
     }
 
     private function validated(Request $request): array

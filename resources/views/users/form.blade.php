@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.pos')
 @section('title', $user->exists ? 'Edit User' : 'Create User')
 @section('content')
 <h1>{{ $user->exists ? 'Edit User' : 'Create User' }}</h1>
@@ -21,7 +21,7 @@
     @endif
     <div>
         <button class="btn" type="submit">Save User</button>
-        <a class="btn" href="{{ route('users') }}">Cancel</a>
+        <a class="btn" href="{{ route('users.index') }}">Cancel</a>
     </div>
 </form>
 @endsection
